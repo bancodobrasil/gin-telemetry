@@ -15,15 +15,18 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 )
 
+// TracerProvider is ...
 type TracerProvider struct {
 	name string
 	*sdktrace.TracerProvider
 }
 
+// ITracerProvider is ...
 type ITracerProvider struct {
 	GetName string
 }
 
+// TracerProvider.GetName is ...
 func (t *TracerProvider) GetName() string {
 	return t.name
 }
@@ -47,6 +50,7 @@ func init() {
 	}
 }
 
+// NewJaegerProvider is ...
 func NewJaegerProvider() TracerProvider {
 	jaegerURL := viper.GetString("JAEGER_URL")
 	exporter, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(fmt.Sprintf("%s/api/traces", jaegerURL))))

@@ -22,6 +22,7 @@ const (
 	id          = 1
 )
 
+// New is ...
 func New(service string, opts ...Option) gin.HandlerFunc {
 	log.Println("Configuring gin-telemetry middleware...")
 	cfg := configuration{}

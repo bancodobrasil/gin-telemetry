@@ -10,6 +10,7 @@ type configuration struct {
 	Propagators propagation.TextMapPropagator
 }
 
+// Option is ...
 type Option interface {
 	apply(*configuration)
 }
