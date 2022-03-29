@@ -3,6 +3,7 @@ package tracing
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"go.opentelemetry.io/otel"
@@ -17,14 +18,24 @@ var tracer trace.Tracer
 const (
 	key         = "gin-tracing"
 	name        = "https://github.com/bancodobrasil/gin-tracing"
-	service     = "trace-demo"
 	environment = "production"
 	id          = 1
 )
 
+var (
+	service string
+)
+
 // New is ...
-func New(service string, opts ...Option) gin.HandlerFunc {
+func New(serviceDescription string, opts ...Option) gin.HandlerFunc {
 	log.Println("Configuring gin-telemetry middleware...")
+
+	if serviceDescription == "" {
+		hostname, _ := os.Hostname()
+		service = fmt.Sprintf("service-demo %s", hostname)
+	} else {
+		service = serviceDescription
+	}
 	cfg := configuration{}
 
 	for _, opt := range opts {
