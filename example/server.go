@@ -16,5 +16,5 @@ func main() {
 		c.String(http.StatusOK, "Hello %s", name)
 	})
 
-	router.Run(":8080")
+	router.Run(":7000")
 }

@@ -7,10 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/exporters/jaeger"
 	"go.opentelemetry.io/otel/propagation"
-	"go.opentelemetry.io/otel/sdk/resource"
-	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
 	"go.opentelemetry.io/otel/trace"
 )
@@ -25,24 +22,8 @@ const (
 	id          = 1
 )
 
-func defaultProvider() *sdktrace.TracerProvider {
-	exp, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint("http://localhost:14268/api/traces")))
-	if err != nil {
-		log.Fatal(err)
-	}
-	tp := sdktrace.NewTracerProvider(
-		sdktrace.WithBatcher(exp),
-		sdktrace.WithResource(resource.NewWithAttributes(
-			semconv.SchemaURL,
-			semconv.ServiceNameKey.String(service),
-			attribute.String("environment", environment),
-			attribute.Int64("ID", id),
-		)),
-	)
-	return tp
-}
-
 func New(service string, opts ...Option) gin.HandlerFunc {
+	log.Println("Configuring gin-telemetry middleware...")
 	cfg := configuration{}
 
 	for _, opt := range opts {
@@ -50,7 +31,7 @@ func New(service string, opts ...Option) gin.HandlerFunc {
 	}
 
 	if cfg.Provider == nil {
-		cfg.Provider = defaultProvider()
+		cfg.Provider = NewJaegerProvider()
 	}
 
 	tracer := cfg.Provider.Tracer(
@@ -61,7 +42,7 @@ func New(service string, opts ...Option) gin.HandlerFunc {
 	if cfg.Propagators == nil {
 		cfg.Propagators = otel.GetTextMapPropagator()
 	}
-
+	log.Println("Gin-telemetry successfully configured!")
 	return func(c *gin.Context) {
 		c.Set(key, tracer)
 		tracedCtx := c.Request.Context()
