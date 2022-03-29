@@ -26,7 +26,7 @@ type ITracerProvider struct {
 	GetName string
 }
 
-// TracerProvider.GetName is ...
+// GetName ...
 func (t *TracerProvider) GetName() string {
 	return t.name
 }
