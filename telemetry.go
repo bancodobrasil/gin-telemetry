@@ -77,7 +77,7 @@ func New(serviceDescription string, opts ...Option) gin.HandlerFunc {
 		ctx, span := tracer.Start(ctx, spanName, opts...)
 		defer span.End()
 
-		c.Request = c.Request.WithContext(tracedCtx)
+		c.Request = c.Request.WithContext(ctx)
 		c.Next()
 
 		status := c.Writer.Status()
