@@ -14,7 +14,7 @@ import (
 
 func main() {
 
-	externalServiceUrl := os.Getenv("EXTERNAL_SERVICE_URL")
+	externalServiceURL := os.Getenv("EXTERNAL_SERVICE_URL")
 	serviceName := os.Getenv("SERVICE_NAME")
 	serverPort := os.Getenv("PORT")
 	if serverPort == "" {
@@ -25,9 +25,9 @@ func main() {
 
 	router.GET("/user/:name", telemetry.Middleware(serviceName), func(c *gin.Context) {
 		name := c.Param("name")
-		if externalServiceUrl != "" {
+		if externalServiceURL != "" {
 			ctx := c.Request.Context()
-			req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("%s/user/%s", externalServiceUrl, name), nil)
+			req, err := http.NewRequestWithContext(ctx, "GET", fmt.Sprintf("%s/user/%s", externalServiceURL, name), nil)
 
 			if err != nil {
 				log.Fatal(err)
@@ -46,7 +46,7 @@ func main() {
 				log.Fatal(err)
 			}
 			name = string(data)
-			c.String(http.StatusOK, "Response from %s: '%s'", externalServiceUrl, name)
+			c.String(http.StatusOK, "Response from %s: '%s'", externalServiceURL, name)
 		} else {
 			c.String(http.StatusOK, "Hello %s", name)
 		}

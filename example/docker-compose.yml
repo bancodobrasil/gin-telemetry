@@ -15,7 +15,6 @@ services:
 
   service2:
     image: gin-telemetry-example-server
-    build: .
     environment:
       - EXTERNAL_SERVICE_URL=http://service3:7000
       - TELEMETRY_EXPORTER_URL=http://jaeger:14268
@@ -26,7 +25,6 @@ services:
   
   service3:
     image: gin-telemetry-example-server
-    build: .
     environment:
       - TELEMETRY_EXPORTER_URL=http://jaeger:14268
       - TELEMETRY_HTTPCLIENT_TLS=false
