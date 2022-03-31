@@ -6,11 +6,11 @@ import (
 )
 
 type configuration struct {
-	Provider    trace.TracerProvider
-	Propagators propagation.TextMapPropagator
+	Provider   trace.TracerProvider
+	Propagator propagation.TextMapPropagator
 }
 
-// Option is ...
+// Option ...
 type Option interface {
 	apply(*configuration)
 }
@@ -32,7 +32,7 @@ func withProvider(provider trace.TracerProvider) Option {
 func withPropagators(propagators propagation.TextMapPropagator) Option {
 	return option(func(c *configuration) {
 		if propagators != nil {
-			c.Propagators = propagators
+			c.Propagator = propagators
 		}
 	})
 }

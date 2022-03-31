@@ -1,12 +1,13 @@
 package tracing
 
 import (
+	"context"
 	"fmt"
-	"log"
+	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
-	"go.opentelemetry.io/otel"
+	log "github.com/sirupsen/logrus"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/propagation"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
@@ -15,33 +16,38 @@ import (
 
 var tracer trace.Tracer
 
+type keyContext string
+
 const (
-	key         = "gin-tracing"
-	name        = "https://github.com/bancodobrasil/gin-tracing"
-	environment = "production"
-	id          = 1
+	keyTracer     keyContext = "gin-telemetry-trace"
+	keyPropagator keyContext = "gin-telemetry-propagator"
+	name          string     = "https://github.com/bancodobrasil/gin-telemetry"
+	environment   string     = "production"
+	id            int64      = 1
 )
 
 var (
 	service string
 )
 
-// New is ...
-func New(serviceDescription string, opts ...Option) gin.HandlerFunc {
-	log.Println("Configuring gin-telemetry middleware...")
+// Middleware ...
+func Middleware(serviceName string, opts ...Option) gin.HandlerFunc {
+	log.Info("Configuring gin-telemetry middleware ...")
 
-	if serviceDescription == "" {
+	if serviceName == "" {
 		hostname, _ := os.Hostname()
-		service = fmt.Sprintf("service-demo %s", hostname)
+		service = fmt.Sprintf("service-%s", hostname)
 	} else {
-		service = serviceDescription
+		service = serviceName
 	}
+
 	cfg := configuration{}
 
 	for _, opt := range opts {
 		opt.apply(&cfg)
 	}
 
+	// setting default provider to Jaeger
 	if cfg.Provider == nil {
 		cfg.Provider = NewJaegerProvider()
 	}
@@ -51,19 +57,20 @@ func New(serviceDescription string, opts ...Option) gin.HandlerFunc {
 		trace.WithInstrumentationVersion("0.0.1"),
 	)
 
-	if cfg.Propagators == nil {
-		cfg.Propagators = otel.GetTextMapPropagator()
+	if cfg.Propagator == nil {
+		cfg.Propagator = getDefaultTextMapPropagator()
 	}
-	log.Println("Gin-telemetry successfully configured!")
-	return func(c *gin.Context) {
-		c.Set(key, tracer)
-		tracedCtx := c.Request.Context()
 
+	log.Info("Gin-telemetry successfully configured!")
+	return func(c *gin.Context) {
+		tracedCtx := c.Request.Context()
+		tracedCtx = context.WithValue(tracedCtx, keyTracer, tracer)
+		tracedCtx = context.WithValue(tracedCtx, keyPropagator, cfg.Propagator)
 		defer func() {
 			c.Request = c.Request.WithContext(tracedCtx)
 		}()
 
-		ctx := cfg.Propagators.Extract(tracedCtx, propagation.HeaderCarrier(c.Request.Header))
+		ctx := cfg.Propagator.Extract(tracedCtx, propagation.HeaderCarrier(c.Request.Header))
 		opts := []trace.SpanStartOption{
 			trace.WithAttributes(semconv.NetAttributesFromHTTPRequest("tcp", c.Request)...),
 			trace.WithAttributes(semconv.EndUserAttributesFromHTTPRequest(c.Request)...),
@@ -89,4 +96,17 @@ func New(serviceDescription string, opts ...Option) gin.HandlerFunc {
 			span.SetAttributes(attribute.String("gin.errors", c.Errors.String()))
 		}
 	}
+}
+
+// GetTracer ...
+func GetTracer(ctx context.Context) trace.Tracer {
+	tracerInterface := ctx.Value(keyTracer)
+	return tracerInterface.(trace.Tracer)
+}
+
+// Inject ...
+func Inject(ctx context.Context, headers http.Header) {
+	propagatorInteface := ctx.Value(keyPropagator)
+	propagator := propagatorInteface.(propagation.TextMapPropagator)
+	propagator.Inject(ctx, propagation.HeaderCarrier(headers))
 }

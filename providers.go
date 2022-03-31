@@ -2,10 +2,11 @@ package tracing
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/spf13/viper"
 	"go.opentelemetry.io/otel/attribute"
@@ -15,13 +16,13 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.4.0"
 )
 
-// TracerProvider is ...
+// TracerProvider ...
 type TracerProvider struct {
 	name string
 	*sdktrace.TracerProvider
 }
 
-// ITracerProvider is ...
+// ITracerProvider ...
 type ITracerProvider struct {
 	GetName string
 }
@@ -44,15 +45,16 @@ func init() {
 	replacer := strings.NewReplacer(".", "_")
 	viper.SetEnvKeyReplacer(replacer)
 	viper.AutomaticEnv()
-	viper.SetDefault("JAEGER_URL", "http://0.0.0.0:14268")
+	viper.SetDefault("TELEMETRY_EXPORTER_URL", "http://localhost:14268")
+	viper.SetDefault("TELEMETRY_HTTPCLIENT_TLS", true)
 	if err := viper.ReadInConfig(); err == nil {
-		log.Printf("Using config file: %s", viper.ConfigFileUsed())
+		log.Infof("Using config file: %s", viper.ConfigFileUsed())
 	}
 }
 
-// NewJaegerProvider is ...
+// NewJaegerProvider ...
 func NewJaegerProvider() TracerProvider {
-	jaegerURL := viper.GetString("JAEGER_URL")
+	jaegerURL := viper.GetString("TELEMETRY_EXPORTER_URL")
 	exporter, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(fmt.Sprintf("%s/api/traces", jaegerURL))))
 	if err != nil {
 		log.Fatal(err)

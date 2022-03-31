@@ -1,19 +1,38 @@
 version: '3.7'
+
 services:
-  # service1:
-  #   image: gin-telemetry-example-server
-  #   build: .
-  #   environment:
-  #     - EXTERNAL_SERVICE_URL=http://service2:7000
-  #     - JAEGER_URL=http://jaeger:14268
-  #     - SERVICE_NAME=SERVICE1
-  #   ports:
-  #     - "7000:7000"
-  # service2:
-  #   image: gin-telemetry-example-server
-  #   environment:
-  #     - JAEGER_URL=http://jaeger:14268
-  #     - SERVICE_NAME=SERVICE2
+
+  service1:
+    image: gin-telemetry-example-server
+    build: .
+    environment:
+      - EXTERNAL_SERVICE_URL=http://service2:7000
+      - TELEMETRY_EXPORTER_URL=http://jaeger:14268
+      - TELEMETRY_HTTPCLIENT_TLS=false
+      - SERVICE_NAME=SERVICE1
+    ports:
+      - "7001:7000"
+
+  service2:
+    image: gin-telemetry-example-server
+    build: .
+    environment:
+      - EXTERNAL_SERVICE_URL=http://service3:7000
+      - TELEMETRY_EXPORTER_URL=http://jaeger:14268
+      - TELEMETRY_HTTPCLIENT_TLS=false
+      - SERVICE_NAME=SERVICE2
+    ports:
+      - "7002:7000"
+  
+  service3:
+    image: gin-telemetry-example-server
+    build: .
+    environment:
+      - TELEMETRY_EXPORTER_URL=http://jaeger:14268
+      - TELEMETRY_HTTPCLIENT_TLS=false
+      - SERVICE_NAME=SERVICE3
+    ports:
+      - "7003:7000"
 
   jaeger:
     image: jaegertracing/all-in-one:latest

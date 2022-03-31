@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/gin-gonic/gin v1.7.7
+	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/viper v1.10.1
 	go.opentelemetry.io/otel v1.6.0
 	go.opentelemetry.io/otel/exporters/jaeger v1.6.0
