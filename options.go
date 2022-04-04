@@ -1,4 +1,4 @@
-package tracing
+package telemetry
 
 import (
 	"go.opentelemetry.io/otel/propagation"
@@ -15,22 +15,22 @@ type Option interface {
 	apply(*configuration)
 }
 
-type option func(*configuration)
+type optionFunc func(*configuration)
 
-func (ic option) apply(c *configuration) {
-	ic.apply(c)
+func (o optionFunc) apply(c *configuration) {
+	o(c)
 }
 
-func withProvider(provider trace.TracerProvider) Option {
-	return option(func(c *configuration) {
+func WithProvider(provider trace.TracerProvider) Option {
+	return optionFunc(func(c *configuration) {
 		if provider != nil {
 			c.Provider = provider
 		}
 	})
 }
 
-func withPropagators(propagators propagation.TextMapPropagator) Option {
-	return option(func(c *configuration) {
+func WithPropagators(propagators propagation.TextMapPropagator) Option {
+	return optionFunc(func(c *configuration) {
 		if propagators != nil {
 			c.Propagator = propagators
 		}

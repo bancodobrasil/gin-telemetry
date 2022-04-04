@@ -1,4 +1,4 @@
-package tracing
+package telemetry
 
 import (
 	"crypto/tls"
