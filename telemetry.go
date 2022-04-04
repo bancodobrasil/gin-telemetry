@@ -64,7 +64,7 @@ func Middleware(serviceName string, opts ...Option) gin.HandlerFunc {
 
 	tracer := cfg.Provider.Tracer(
 		name,
-		trace.WithInstrumentationVersion("0.0.1"),
+		trace.WithInstrumentationVersion("v0.0.1-rc1"),
 	)
 
 	if cfg.Propagator == nil {
