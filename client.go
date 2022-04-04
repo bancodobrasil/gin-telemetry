@@ -11,7 +11,7 @@ import (
 var HTTPClient *http.Client = newHTTPClient()
 
 func newHTTPClient() *http.Client {
-	enableTLS := !viper.GetBool("TELEMETRY_HTTP_CLIENT_TLS")
+	enableTLS := viper.GetBool("TELEMETRY_HTTP_CLIENT_TLS")
 	var transCfg http.RoundTripper
 	if enableTLS {
 		transCfg = http.DefaultTransport
