@@ -21,6 +21,7 @@ func (o optionFunc) apply(c *configuration) {
 	o(c)
 }
 
+// WithProvider ...
 func WithProvider(provider trace.TracerProvider) Option {
 	return optionFunc(func(c *configuration) {
 		if provider != nil {
@@ -29,6 +30,7 @@ func WithProvider(provider trace.TracerProvider) Option {
 	})
 }
 
+// WithPropagators ...
 func WithPropagators(propagators propagation.TextMapPropagator) Option {
 	return optionFunc(func(c *configuration) {
 		if propagators != nil {

@@ -13,6 +13,7 @@ Below are the environment variables that affect the behavior of the middleware:
 | -------- | ------------| ------- |
 | TELEMETRY_EXPORTER_URL | Endpoint URL for the collector that spans are sent to  | http://localhost:14268 |
 | TELEMETRY_HTTPCLIENT_TLS | Custom http client for passthrough TLS enabled | true |
+| TELEMETRY_DISABLED | Disable middleware to export span for collectors | false |
 
 ## Register Tracing Middleware
 

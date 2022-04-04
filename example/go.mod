@@ -3,7 +3,7 @@ module example
 go 1.18
 
 require (
-	github.com/bancodobrasil/gin-telemetry v0.0.0-20220331131913-55113b8ad002
+	github.com/bancodobrasil/gin-telemetry v0.0.0-20220404142451-36dc812663f2
 	github.com/gin-gonic/gin v1.7.7
 )
 
@@ -33,10 +33,10 @@ require (
 	github.com/spf13/viper v1.10.1 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/ugorji/go/codec v1.1.7 // indirect
-	go.opentelemetry.io/otel v1.6.0 // indirect
+	go.opentelemetry.io/otel v1.6.1 // indirect
 	go.opentelemetry.io/otel/exporters/jaeger v1.6.0 // indirect
 	go.opentelemetry.io/otel/sdk v1.6.0 // indirect
-	go.opentelemetry.io/otel/trace v1.6.0 // indirect
+	go.opentelemetry.io/otel/trace v1.6.1 // indirect
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
 	golang.org/x/sys v0.0.0-20211210111614-af8b64212486 // indirect
 	golang.org/x/text v0.3.7 // indirect

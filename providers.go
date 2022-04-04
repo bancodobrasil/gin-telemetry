@@ -2,6 +2,7 @@ package telemetry
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -47,6 +48,7 @@ func init() {
 	viper.AutomaticEnv()
 	viper.SetDefault("TELEMETRY_EXPORTER_URL", "http://localhost:14268")
 	viper.SetDefault("TELEMETRY_HTTPCLIENT_TLS", true)
+	viper.SetDefault("TELEMETRY_DISABLED", false)
 	if err := viper.ReadInConfig(); err == nil {
 		log.Infof("Using config file: %s", viper.ConfigFileUsed())
 	}
@@ -55,7 +57,12 @@ func init() {
 // NewJaegerProvider ...
 func NewJaegerProvider() TracerProvider {
 	jaegerURL := viper.GetString("TELEMETRY_EXPORTER_URL")
-	exporter, err := jaeger.New(jaeger.WithCollectorEndpoint(jaeger.WithEndpoint(fmt.Sprintf("%s/api/traces", jaegerURL))))
+	exporter, err := jaeger.New(
+		jaeger.WithCollectorEndpoint(
+			jaeger.WithEndpoint(fmt.Sprintf("%s/api/traces", jaegerURL)),
+			jaeger.WithHTTPClient(http.DefaultClient),
+		),
+	)
 	if err != nil {
 		log.Fatal(err)
 	}

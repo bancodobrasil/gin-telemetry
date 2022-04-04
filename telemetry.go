@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/propagation"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
@@ -32,6 +33,15 @@ var (
 
 // Middleware ...
 func Middleware(serviceName string, opts ...Option) gin.HandlerFunc {
+	middlewareDisabled := viper.GetViper().GetBool("TELEMETRY_DISABLED")
+
+	if middlewareDisabled {
+		log.Info("*** Gin-telemetry disabled ***")
+		return func(c *gin.Context) {
+			c.Next()
+		}
+	}
+
 	log.Info("Configuring gin-telemetry middleware ...")
 
 	if serviceName == "" {
@@ -62,6 +72,7 @@ func Middleware(serviceName string, opts ...Option) gin.HandlerFunc {
 	}
 
 	log.Info("Gin-telemetry successfully configured!")
+
 	return func(c *gin.Context) {
 		tracedCtx := c.Request.Context()
 		tracedCtx = context.WithValue(tracedCtx, keyTracer, tracer)
