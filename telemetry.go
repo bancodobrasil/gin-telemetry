@@ -36,13 +36,13 @@ func Middleware(serviceName string, opts ...Option) gin.HandlerFunc {
 	middlewareDisabled := viper.GetViper().GetBool("TELEMETRY_DISABLED")
 
 	if middlewareDisabled {
-		log.Info("*** Gin-telemetry disabled ***")
+		log.Debug("*** Gin-telemetry disabled ***")
 		return func(c *gin.Context) {
 			c.Next()
 		}
 	}
 
-	log.Info("Configuring gin-telemetry middleware ...")
+	log.Debug("Configuring gin-telemetry middleware ...")
 
 	if serviceName == "" {
 		hostname, _ := os.Hostname()
@@ -71,7 +71,7 @@ func Middleware(serviceName string, opts ...Option) gin.HandlerFunc {
 		cfg.Propagator = getDefaultTextMapPropagator()
 	}
 
-	log.Info("Gin-telemetry successfully configured!")
+	log.Debug("Gin-telemetry successfully configured!")
 
 	return func(c *gin.Context) {
 		tracedCtx := c.Request.Context()
