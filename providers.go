@@ -50,7 +50,7 @@ func init() {
 	viper.SetDefault("TELEMETRY_HTTPCLIENT_TLS", true)
 	viper.SetDefault("TELEMETRY_DISABLED", false)
 	if err := viper.ReadInConfig(); err == nil {
-		log.Infof("Using config file: %s", viper.ConfigFileUsed())
+		log.Debugf("Using config file: %s", viper.ConfigFileUsed())
 	}
 }
 
