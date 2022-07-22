@@ -1,8 +1,6 @@
 package telemetry
 
 import (
-	"fmt"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -39,6 +37,7 @@ func init() {
 		log.Fatal(err)
 	}
 	exePath := filepath.Dir(ex)
+
 	viper.AddConfigPath(exePath)
 	viper.SetConfigType("env")
 	viper.SetConfigName(".env")
@@ -46,21 +45,32 @@ func init() {
 	replacer := strings.NewReplacer(".", "_")
 	viper.SetEnvKeyReplacer(replacer)
 	viper.AutomaticEnv()
-	viper.SetDefault("TELEMETRY_EXPORTER_URL", "http://localhost:14268")
+	viper.SetDefault("TELEMETRY_EXPORTER_JAEGER_AGENT_HOST", "localhost")
+	viper.SetDefault("TELEMETRY_EXPORTER_JAEGER_AGENT_PORT", "6831")
 	viper.SetDefault("TELEMETRY_HTTPCLIENT_TLS", true)
 	viper.SetDefault("TELEMETRY_DISABLED", false)
-	if err := viper.ReadInConfig(); err == nil {
-		log.Debugf("Using config file: %s", viper.ConfigFileUsed())
+	viper.SetDefault("TELEMETRY_ENVIRONMENT", "test")
+
+	err = viper.ReadInConfig()
+
+	if err != nil {
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			log.Infof("Config file not found.")
+		} else {
+			log.Errorf("Config file corrupted. Cause: %v", err)
+			return
+		}
+	} else {
+		log.Infof("Using config file: %s", viper.ConfigFileUsed())
 	}
 }
 
 // NewJaegerProvider ...
 func NewJaegerProvider() TracerProvider {
-	jaegerURL := viper.GetString("TELEMETRY_EXPORTER_URL")
 	exporter, err := jaeger.New(
-		jaeger.WithCollectorEndpoint(
-			jaeger.WithEndpoint(fmt.Sprintf("%s/api/traces", jaegerURL)),
-			jaeger.WithHTTPClient(http.DefaultClient),
+		jaeger.WithAgentEndpoint(
+			jaeger.WithAgentHost(viper.GetString("TELEMETRY_EXPORTER_JAEGER_AGENT_HOST")),
+			jaeger.WithAgentPort(viper.GetString("TELEMETRY_EXPORTER_JAEGER_AGENT_PORT")),
 		),
 	)
 	if err != nil {
@@ -78,8 +88,8 @@ func getTracerProvider(exporter sdktrace.SpanExporter) *sdktrace.TracerProvider 
 		sdktrace.WithResource(resource.NewWithAttributes(
 			semconv.SchemaURL,
 			semconv.ServiceNameKey.String(service),
-			attribute.String("environment", environment),
-			attribute.Int64("ID", id),
+			attribute.String("environment", viper.GetString("TELEMETRY_ENVIRONMENT")),
+			attribute.Int64("ID", int64(os.Getpid())),
 		)),
 	)
 	return tracerProvider
