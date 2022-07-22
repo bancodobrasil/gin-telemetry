@@ -61,7 +61,7 @@ func init() {
 			return
 		}
 	} else {
-		log.Debug("Using config file: %s", viper.ConfigFileUsed())
+		log.Debugf("Using config file: %s", viper.ConfigFileUsed())
 	}
 }
 
