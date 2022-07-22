@@ -37,7 +37,9 @@ func main() {
 			res, err := telemetry.HTTPClient.Do(req)
 
 			if err != nil {
-				log.Fatal(err)
+				log.WithContext(ctx).Error(err)
+				c.String(http.StatusInternalServerError, "Internal error")
+				return
 			}
 
 			defer res.Body.Close()

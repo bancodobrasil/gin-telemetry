@@ -7,7 +7,7 @@ services:
     build: .
     environment:
       - EXTERNAL_SERVICE_URL=http://service2:7000
-      - TELEMETRY_EXPORTER_URL=http://jaeger:14268
+      - TELEMETRY_EXPORTER_JAEGER_AGENT_HOST=jaeger
       - TELEMETRY_HTTPCLIENT_TLS=false
       - SERVICE_NAME=SERVICE1
     ports:
@@ -17,7 +17,7 @@ services:
     image: gin-telemetry-example-server
     environment:
       - EXTERNAL_SERVICE_URL=http://service3:7000
-      - TELEMETRY_EXPORTER_URL=http://jaeger:14268
+      - TELEMETRY_EXPORTER_JAEGER_AGENT_HOST=jaeger
       - TELEMETRY_HTTPCLIENT_TLS=false
       - SERVICE_NAME=SERVICE2
     ports:
@@ -26,7 +26,8 @@ services:
   service3:
     image: gin-telemetry-example-server
     environment:
-      - TELEMETRY_EXPORTER_URL=http://jaeger:14268
+      - EXTERNAL_SERVICE_URL=http://service4:7000
+      - TELEMETRY_EXPORTER_JAEGER_AGENT_HOST=jaeger
       - TELEMETRY_HTTPCLIENT_TLS=false
       - SERVICE_NAME=SERVICE3
     ports:
