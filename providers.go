@@ -55,13 +55,13 @@ func init() {
 
 	if err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			log.Infof("Config file not found.")
+			log.Debug("Config file not found.")
 		} else {
 			log.Errorf("Config file corrupted. Cause: %v", err)
 			return
 		}
 	} else {
-		log.Infof("Using config file: %s", viper.ConfigFileUsed())
+		log.Debug("Using config file: %s", viper.ConfigFileUsed())
 	}
 }
 
