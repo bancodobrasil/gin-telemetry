@@ -11,9 +11,11 @@ go get -u github.com/bancodobrasil/gin-telemetry
 Below are the environment variables that affect the behavior of the middleware: 
 | Variable | Description | Default |
 | -------- | ------------| ------- |
-| TELEMETRY_EXPORTER_URL | Endpoint URL for the collector that spans are sent to  | http://localhost:14268 |
+| TELEMETRY_EXPORTER_JAEGER_AGENT_HOST | Agent Host for the collector that spans are sent to  | localhost |
+| TELEMETRY_EXPORTER_JAEGER_AGENT_PORT | Agent Port URL for the collector that spans are sent to  | 6831 |
 | TELEMETRY_HTTPCLIENT_TLS | Custom http client for passthrough TLS enabled | true |
 | TELEMETRY_DISABLED | Disable middleware to export span for collectors | false |
+| TELEMETRY_ENVIRONMENT | Environment to export span for collectors | test |
 
 ## Register Tracing Middleware
 
@@ -52,7 +54,7 @@ func main() {
   // ... extra code
 }
 
-func handlerImple(c *gin.Context) {
+func handlerImpl(c *gin.Context) {
   // handler implementation
 }
 ```
@@ -91,7 +93,28 @@ func handlerImple(c *gin.Context) {
   // ... extra code
 }
 ```
-## Example
+## Logrus Logging
+
+This instrumentation records logrus log messages as events on the existing span that is passed via a context.Context.
+
+**It does not record anything if a context does not contain a span.**
+
+Example:
+```go
+import (
+    "github.com/uptrace/opentelemetry-go-extra/otellogrus"
+    "github.com/sirupsen/logrus"
+)
+// ...extra code
+// Use ctx to pass the active span.
+logrus.WithContext(ctx).
+	WithError(errors.New("hello world")).
+	WithField("foo", "bar").
+	Error("something failed")
+  // ...extra code
+```
+
+## Docker Compose Example
 
 in the `example` folder we have a docker-compose for testing traceability between 3 services and a active Jaeger as an exporter. 
 
@@ -113,4 +136,4 @@ The jaeger is published with the address below:
 http://localhost:16686
 ```
 
-Open the browser and execute request according to addresses above and check jaeger panel
+Open the browser and execute request according to addresses above and check jaeger panel. Thx!

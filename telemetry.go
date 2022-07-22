@@ -9,6 +9,7 @@ import (
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"github.com/uptrace/opentelemetry-go-extra/otellogrus"
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/propagation"
 	semconv "go.opentelemetry.io/otel/semconv/v1.7.0"
@@ -21,10 +22,10 @@ type keyContext string
 
 const (
 	keyTracer     keyContext = "gin-telemetry-trace"
+	keyRootSpan   keyContext = "gin-telemetry-root-span"
 	keyPropagator keyContext = "gin-telemetry-propagator"
 	name          string     = "https://github.com/bancodobrasil/gin-telemetry"
-	environment   string     = "production"
-	id            int64      = 1
+	version       string     = "0.0.1-rc2"
 )
 
 var (
@@ -64,12 +65,22 @@ func Middleware(serviceName string, opts ...Option) gin.HandlerFunc {
 
 	tracer := cfg.Provider.Tracer(
 		name,
-		trace.WithInstrumentationVersion("v0.0.1-rc1"),
+		trace.WithInstrumentationVersion(version),
 	)
 
 	if cfg.Propagator == nil {
 		cfg.Propagator = getDefaultTextMapPropagator()
 	}
+
+	// Instrument logrus
+	log.AddHook(otellogrus.NewHook(
+		otellogrus.WithLevels(
+			log.PanicLevel,
+			log.FatalLevel,
+			log.ErrorLevel,
+			log.WarnLevel,
+		),
+	))
 
 	log.Debug("Gin-telemetry successfully configured!")
 
@@ -95,7 +106,8 @@ func Middleware(serviceName string, opts ...Option) gin.HandlerFunc {
 		ctx, span := tracer.Start(ctx, spanName, opts...)
 		defer span.End()
 
-		c.Request = c.Request.WithContext(ctx)
+		spanCtx := context.WithValue(ctx, keyRootSpan, span)
+		c.Request = c.Request.WithContext(spanCtx)
 		c.Next()
 
 		status := c.Writer.Status()
@@ -113,6 +125,12 @@ func Middleware(serviceName string, opts ...Option) gin.HandlerFunc {
 func GetTracer(ctx context.Context) trace.Tracer {
 	tracerInterface := ctx.Value(keyTracer)
 	return tracerInterface.(trace.Tracer)
+}
+
+// GetRootSpan ...
+func GetRootSpan(ctx context.Context) trace.Span {
+	span := ctx.Value(keyRootSpan)
+	return span.(trace.Span)
 }
 
 // Inject ...
