@@ -29,7 +29,8 @@ const (
 )
 
 var (
-	service            string
+	service string
+	// MiddlewareDisabled ...
 	MiddlewareDisabled bool
 )
 
