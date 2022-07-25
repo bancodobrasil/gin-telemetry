@@ -29,14 +29,15 @@ const (
 )
 
 var (
-	service string
+	service            string
+	MiddlewareDisabled bool
 )
 
 // Middleware ...
 func Middleware(serviceName string, opts ...Option) gin.HandlerFunc {
-	middlewareDisabled := viper.GetViper().GetBool("TELEMETRY_DISABLED")
+	MiddlewareDisabled = viper.GetViper().GetBool("TELEMETRY_DISABLED")
 
-	if middlewareDisabled {
+	if MiddlewareDisabled {
 		log.Debug("*** Gin-telemetry disabled ***")
 		return func(c *gin.Context) {
 			c.Next()
