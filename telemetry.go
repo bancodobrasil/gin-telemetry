@@ -88,7 +88,7 @@ func Middleware(serviceName string, opts ...Option) gin.HandlerFunc {
 
 	return func(c *gin.Context) {
 		tracedCtx := c.Request.Context()
-		tracedCtx = context.WithValue(tracedCtx, keyTracer, tracer)
+		tracedCtx = context.WithValue(tracedCtx, keyTracer, &tracer)
 		tracedCtx = context.WithValue(tracedCtx, keyPropagator, cfg.Propagator)
 		defer func() {
 			c.Request = c.Request.WithContext(tracedCtx)
