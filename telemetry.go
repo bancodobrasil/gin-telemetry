@@ -124,15 +124,21 @@ func Middleware(serviceName string, opts ...Option) gin.HandlerFunc {
 }
 
 // GetTracer ...
-func GetTracer(ctx context.Context) trace.Tracer {
+func GetTracer(ctx context.Context) *trace.Tracer {
 	tracerInterface := ctx.Value(keyTracer)
-	return tracerInterface.(trace.Tracer)
+	if tracerInterface == nil {
+		return nil
+	}
+	return tracerInterface.(*trace.Tracer)
 }
 
 // GetRootSpan ...
-func GetRootSpan(ctx context.Context) trace.Span {
+func GetRootSpan(ctx context.Context) *trace.Span {
 	span := ctx.Value(keyRootSpan)
-	return span.(trace.Span)
+	if span == nil {
+		return nil
+	}
+	return span.(*trace.Span)
 }
 
 // Inject ...
